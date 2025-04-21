@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../bloc/weather_bloc.dart';
 import '../../bloc/weather_event.dart';
+import '../../bloc/weather_state.dart';
 import 'weather_page.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -94,6 +96,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 duration: Duration(seconds: 3),
               ),
             );
+            setState(() {
+              _isRequestingLocation = false;  // Reset flag here
+            });
           }
           return;
         }
