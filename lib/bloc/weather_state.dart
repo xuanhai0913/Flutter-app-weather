@@ -22,20 +22,42 @@ class WeatherLoadInProgress extends WeatherState {
   const WeatherLoadInProgress({super.temperatureUnit});
 }
 
+// New state for when weather is refreshing
+class WeatherRefreshInProgress extends WeatherState {
+  final Weather previousWeather;
+  final List<Forecast>? previousForecasts;
+  
+  const WeatherRefreshInProgress({
+    required this.previousWeather,
+    this.previousForecasts,
+    super.temperatureUnit,
+  });
+  
+  @override
+  List<Object> get props => [
+    previousWeather, 
+    if (previousForecasts != null) previousForecasts!,
+    temperatureUnit
+  ];
+}
+
 class WeatherLoadSuccess extends WeatherState {
   final Weather weather;
   final List<Forecast>? forecasts;
+  final DateTime lastUpdated;
   
   const WeatherLoadSuccess({
     required this.weather,
     this.forecasts,
+    required this.lastUpdated,
     super.temperatureUnit,
   });
   
   @override
   List<Object> get props => [
     weather, 
-    if (forecasts != null) forecasts!, 
+    if (forecasts != null) forecasts!,
+    lastUpdated,
     temperatureUnit
   ];
   
@@ -43,11 +65,13 @@ class WeatherLoadSuccess extends WeatherState {
     Weather? weather,
     List<Forecast>? forecasts,
     TemperatureUnit? temperatureUnit,
+    DateTime? lastUpdated,
   }) {
     return WeatherLoadSuccess(
       weather: weather ?? this.weather,
       forecasts: forecasts ?? this.forecasts,
       temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
   
@@ -78,6 +102,12 @@ class WeatherLoadSuccess extends WeatherState {
   
   String get temperatureUnitSymbol {
     return temperatureUnit == TemperatureUnit.celsius ? '°C' : '°F';
+  }
+  
+  // Method to check if data is stale (older than 30 minutes)
+  bool get isDataStale {
+    final now = DateTime.now();
+    return now.difference(lastUpdated).inMinutes > 30;
   }
 }
 

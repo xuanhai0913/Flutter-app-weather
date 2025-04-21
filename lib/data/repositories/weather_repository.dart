@@ -58,7 +58,7 @@ class WeatherRepository {
       
       // Only add one forecast per day (preferably around noon)
       if (day != currentDay && dailyForecasts.length < 5) {
-        dailyForecasts.add(Forecast.fromJson(item));
+        dailyForecasts.add(Forecast.fromRepository(item));
         currentDay = day;
       }
     }
@@ -88,7 +88,7 @@ class WeatherRepository {
       final String day = '${dateTime.year}-${dateTime.month}-${dateTime.day}';
       
       if (day != currentDay && dailyForecasts.length < 5) {
-        dailyForecasts.add(Forecast.fromJson(item));
+        dailyForecasts.add(Forecast.fromRepository(item));
         currentDay = day;
       }
     }

@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'forecast.g.dart';
+
+@JsonSerializable()
 class Forecast extends Equatable {
   final DateTime date;
   final double temperature;
@@ -54,19 +58,24 @@ class Forecast extends Equatable {
     }
   }
 
-  factory Forecast.fromJson(Map<String, dynamic> json) {
+  factory Forecast.fromJson(Map<String, dynamic> json) => _$ForecastFromJson(json);
+  
+  Map<String, dynamic> toJson() => _$ForecastToJson(this);
+  
+  // Factory constructor for API data
+  static Forecast fromRepository(Map<String, dynamic> json) {
     final main = json['main'];
     final weather = json['weather'][0];
     final wind = json['wind'];
     
     return Forecast(
       date: DateTime.fromMillisecondsSinceEpoch(json['dt'] * 1000),
-      temperature: main['temp'].toDouble(),
-      feelsLike: main['feels_like'].toDouble(),
-      humidity: main['humidity'],
-      description: weather['description'],
-      iconCode: weather['icon'],
-      windSpeed: wind['speed'].toDouble(),
+      temperature: (main['temp'] as num).toDouble(),
+      feelsLike: (main['feels_like'] as num).toDouble(),
+      humidity: main['humidity'] as int,
+      description: weather['description'] as String,
+      iconCode: weather['icon'] as String,
+      windSpeed: (wind['speed'] as num).toDouble(),
     );
   }
 }

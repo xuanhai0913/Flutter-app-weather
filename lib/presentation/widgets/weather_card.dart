@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/models/weather.dart';
 import '../../data/models/forecast.dart';
 import '../../bloc/weather_event.dart';
@@ -29,60 +30,146 @@ class WeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
     return Column(
       children: [
-        Card(
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  weather.cityName,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+        // Main weather card with hero animation for transitions
+        Hero(
+          tag: 'weather_card_${weather.cityName}',
+          child: Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(16.r),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 20.sp,
+                        color: theme.colorScheme.primary,
+                      ),
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: Text(
+                          weather.cityName,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${temperatureValue.toStringAsFixed(1)}$temperatureSymbol',
-                      style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w500,
+                  SizedBox(height: 16.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${temperatureValue.toStringAsFixed(1)}',
+                        style: TextStyle(
+                          fontSize: 48.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _getTemperatureColor(temperatureValue, isDarkMode),
+                        ),
+                      ),
+                      Text(
+                        temperatureSymbol,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _getTemperatureColor(temperatureValue, isDarkMode),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Weather condition icon
+                      Image.network(
+                        weather.iconUrl,
+                        width: 60.w,
+                        height: 60.h,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _getWeatherIcon(weather.condition);
+                        },
+                      ),
+                      SizedBox(width: 8.w),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            weather.condition,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            weather.description,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  // Temperature range
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildWeatherDetail(
+                        context,
+                        'Min',
+                        '${minTemp.toStringAsFixed(0)}$temperatureSymbol',
+                        Icons.arrow_downward,
+                      ),
+                      SizedBox(width: 24.w),
+                      _buildWeatherDetail(
+                        context,
+                        'Current',
+                        '${temperatureValue.toStringAsFixed(0)}$temperatureSymbol',
+                        Icons.thermostat,
+                      ),
+                      SizedBox(width: 24.w),
+                      _buildWeatherDetail(
+                        context,
+                        'Max',
+                        '${maxTemp.toStringAsFixed(0)}$temperatureSymbol',
+                        Icons.arrow_upward,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  // Date and time of last update
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      _formatDateTime(DateTime.now()),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    // Use network image instead of icon
-                    Image.network(
-                      weather.iconUrl,
-                      width: 60,
-                      height: 60,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _getWeatherIcon(weather.condition);
-                      },
-                    ),
-                  ],
-                ),
-                Text(
-                  weather.description,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    textBaseline: TextBaseline.alphabetic,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
+        
+        SizedBox(height: 16.h),
         
         // Add detailed weather information card
         WeatherDetailsCard(
@@ -94,6 +181,8 @@ class WeatherCard extends StatelessWidget {
           temperatureSymbol: temperatureSymbol,
         ),
         
+        SizedBox(height: 16.h),
+        
         // Show forecast if available
         if (forecasts != null && forecasts!.isNotEmpty)
           ForecastList(
@@ -104,20 +193,26 @@ class WeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildWeatherDetail(String label, String value) {
+  Widget _buildWeatherDetail(BuildContext context, String label, String value, IconData icon) {
+    final theme = Theme.of(context);
+    
     return Column(
       children: [
+        Icon(
+          icon,
+          size: 16.sp,
+          color: theme.colorScheme.secondary,
+        ),
+        SizedBox(height: 4.h),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -167,8 +262,44 @@ class WeatherCard extends StatelessWidget {
 
     return Icon(
       iconData,
-      size: 36,
+      size: 36.sp,
       color: color,
     );
+  }
+  
+  // Get color based on temperature
+  Color _getTemperatureColor(double temp, bool isDarkMode) {
+    if (temp < 0) {
+      return isDarkMode ? Colors.lightBlue[200]! : Colors.lightBlue;
+    } else if (temp < 10) {
+      return isDarkMode ? Colors.blue[200]! : Colors.blue;
+    } else if (temp < 20) {
+      return isDarkMode ? Colors.green[200]! : Colors.green;
+    } else if (temp < 30) {
+      return isDarkMode ? Colors.orange[300]! : Colors.orange;
+    } else {
+      return isDarkMode ? Colors.red[300]! : Colors.red;
+    }
+  }
+  
+  // Format date and time
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    
+    String dayText;
+    if (date == today) {
+      dayText = 'Today';
+    } else if (date == today.subtract(const Duration(days: 1))) {
+      dayText = 'Yesterday';
+    } else {
+      dayText = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    }
+    
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    
+    return '$dayText, $hour:$minute';
   }
 }

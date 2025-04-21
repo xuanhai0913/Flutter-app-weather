@@ -8,6 +8,7 @@ import '../widgets/weather_card.dart';
 import '../widgets/city_suggestions.dart';
 import '../widgets/error_display.dart';
 import '../widgets/temperature_unit_toggle.dart';
+import '../widgets/stale_data_indicator.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -129,32 +130,82 @@ class _WeatherPageState extends State<WeatherPage> with SingleTickerProviderStat
                     );
                   } else if (state is WeatherLoadInProgress) {
                     return const CircularProgressIndicator();
+                  } else if (state is WeatherRefreshInProgress) {
+                    // Display the previous weather data while refreshing
+                    return FadeTransition(
+                      opacity: _fadeInAnimation,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          RefreshIndicator(
+                            key: _refreshIndicatorKey,
+                            onRefresh: () => _refresh(state.previousWeather.cityName),
+                            color: Theme.of(context).colorScheme.primary,
+                            backgroundColor: Theme.of(context).colorScheme.surface,
+                            strokeWidth: 3.0,
+                            displacement: 50,
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Opacity(
+                                  opacity: 0.6, // Dim the UI to indicate refreshing
+                                  child: WeatherCard(
+                                    weather: state.previousWeather,
+                                    forecasts: state.previousForecasts,
+                                    temperatureUnit: state.temperatureUnit,
+                                    temperatureValue: state.previousWeather.temperature,
+                                    temperatureSymbol: state.temperatureUnit == TemperatureUnit.celsius ? '°C' : '°F',
+                                    feelsLike: state.previousWeather.feelsLike,
+                                    minTemp: state.previousWeather.minTemp,
+                                    maxTemp: state.previousWeather.maxTemp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const LinearProgressIndicator(), // Show a progress indicator at the top
+                        ],
+                      ),
+                    );
                   } else if (state is WeatherLoadSuccess) {
                     return FadeTransition(
                       opacity: _fadeInAnimation,
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        onRefresh: () => _refresh(state.weather.cityName),
-                        color: Theme.of(context).colorScheme.primary,
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        strokeWidth: 3.0,
-                        displacement: 50,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: WeatherCard(
-                              weather: state.weather,
-                              forecasts: state.forecasts,
-                              temperatureUnit: state.temperatureUnit,
-                              temperatureValue: state.temperatureInUnit,
-                              temperatureSymbol: state.temperatureUnitSymbol,
-                              feelsLike: state.feelsLikeInUnit,
-                              minTemp: state.minTempInUnit,
-                              maxTemp: state.maxTempInUnit,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          RefreshIndicator(
+                            key: _refreshIndicatorKey,
+                            onRefresh: () => _refresh(state.weather.cityName),
+                            color: Theme.of(context).colorScheme.primary,
+                            backgroundColor: Theme.of(context).colorScheme.surface,
+                            strokeWidth: 3.0,
+                            displacement: 50,
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  children: [
+                                    // Show stale data indicator if data is old
+                                    if (state.isDataStale)
+                                      const StaleDataIndicator(),
+                                    WeatherCard(
+                                      weather: state.weather,
+                                      forecasts: state.forecasts,
+                                      temperatureUnit: state.temperatureUnit,
+                                      temperatureValue: state.temperatureInUnit,
+                                      temperatureSymbol: state.temperatureUnitSymbol,
+                                      feelsLike: state.feelsLikeInUnit,
+                                      minTemp: state.minTempInUnit,
+                                      maxTemp: state.maxTempInUnit,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     );
                   } else if (state is WeatherLoadFailure) {

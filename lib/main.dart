@@ -45,7 +45,9 @@ class MyApp extends StatelessWidget {
               
               return MaterialApp(
                 title: 'Weather Forecast',
-                theme: AppTheme.getTheme(weatherCondition),
+                theme: AppTheme.getTheme(weatherCondition, darkMode: false),
+                darkTheme: AppTheme.getTheme(weatherCondition, darkMode: true),
+                themeMode: ThemeMode.system, // Use system theme preference
                 home: const WelcomeScreen(),
                 debugShowCheckedModeBanner: false,
               );

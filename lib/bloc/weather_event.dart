@@ -74,3 +74,6 @@ class TemperatureUnitToggled extends WeatherEvent {
   @override
   List<Object> get props => [unit];
 }
+
+// New event for handling request timeouts
+class WeatherRequestTimeout extends WeatherEvent {}
