@@ -20,7 +20,7 @@ class TemperatureUnitToggle extends StatelessWidget {
             duration: const Duration(milliseconds: 300),
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
               borderRadius: BorderRadius.circular(30.r),
               boxShadow: [
                 BoxShadow(

@@ -75,7 +75,7 @@ class WeatherCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${temperatureValue.toStringAsFixed(1)}',
+                        temperatureValue.toStringAsFixed(1),
                         style: TextStyle(
                           fontSize: 48.sp,
                           fontWeight: FontWeight.w500,

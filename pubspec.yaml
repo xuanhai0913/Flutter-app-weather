@@ -54,8 +54,8 @@ dependencies:
   path_provider: ^2.1.2
   
   # For location services
-  geolocator: ^11.0.0
-  geocoding: ^2.2.0
+  geolocator: ^10.0.0
+  geocoding: ^2.3.0
 
 dev_dependencies:
   flutter_test:

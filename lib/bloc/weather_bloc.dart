@@ -1,9 +1,7 @@
-import 'package:bloc/bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_weather_bloc/data/repositories/weather_repository.dart';
 import 'package:flutter_weather_bloc/data/services/location_service.dart';
 import 'dart:async';
-import 'dart:convert';
 import '../data/models/weather.dart';
 import '../data/models/forecast.dart';
 import 'weather_event.dart';
