@@ -17,6 +17,7 @@ class WeatherSearchBar extends StatefulWidget {
 class _WeatherSearchBarState extends State<WeatherSearchBar> {
   final TextEditingController _textController = TextEditingController();
   bool _isLoading = false;
+  bool _isSearching = false;
 
   @override
   void dispose() {
@@ -27,7 +28,20 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
   void _submit() {
     final city = _textController.text.trim();
     if (city.isNotEmpty) {
+      setState(() {
+        _isSearching = true;
+      });
+      
       widget.onCitySubmitted(city);
+      
+      // Reset the searching state after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isSearching = false;
+          });
+        }
+      });
       // Don't clear text to provide better UX - user can see what they searched for
     }
   }
@@ -117,77 +131,103 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
     final theme = Theme.of(context);
     
     return Padding(
-      padding: EdgeInsets.all(16.r),
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+      padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 8.r), // Giảm padding dọc
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.r),
+          color: theme.colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            child: TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                hintText: 'Search for a city...',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: theme.colorScheme.primary,
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _textController,
+                decoration: InputDecoration(
+                  hintText: 'Search for a city...',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.primary,
+                    size: 20.r, // Giảm kích thước icon
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surface,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 8.h, // Giảm padding dọc
+                    horizontal: 12.w, // Giảm padding ngang
+                  ),
                 ),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Clear text button
-                    if (_textController.text.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _textController.clear();
-                        },
-                      ),
-                    // Location button
-                    IconButton(
-                      icon: _isLoading
-                          ? SizedBox(
-                              width: 18.w,
-                              height: 18.h,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: theme.colorScheme.primary,
-                              ),
-                            )
-                          : Icon(
-                              Icons.my_location,
-                              color: theme.colorScheme.primary,
-                            ),
-                      onPressed: _isLoading ? null : _getCurrentLocation,
-                      tooltip: 'Use current location',
-                    ),
-                  ],
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surface,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 12.h,
-                  horizontal: 16.w,
+                onSubmitted: (_) => _submit(),
+                textInputAction: TextInputAction.search,
+                style: TextStyle(fontSize: 14.sp), // Giảm kích thước font
+              ),
+            ),
+            // Nút tìm kiếm mới
+            Material(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(12.r),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12.r),
+                onTap: _isSearching ? null : _submit,
+                child: Container(
+                  padding: EdgeInsets.all(8.r), // Giảm padding
+                  child: _isSearching
+                      ? SizedBox(
+                          width: 18.r,
+                          height: 18.r,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(
+                          Icons.search,
+                          color: Colors.white,
+                          size: 20.r, // Giảm kích thước icon
+                        ),
                 ),
               ),
-              onSubmitted: (_) => _submit(),
-              textInputAction: TextInputAction.search,
-              style: TextStyle(fontSize: 16.sp),
             ),
-          ),
-        ],
+            SizedBox(width: 6.w), // Khoảng cách giữa nút
+            // Nút vị trí
+            Material(
+              color: theme.colorScheme.secondary,
+              borderRadius: BorderRadius.circular(12.r),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12.r),
+                onTap: _isLoading ? null : _getCurrentLocation,
+                child: Container(
+                  padding: EdgeInsets.all(8.r), // Giảm padding
+                  margin: EdgeInsets.only(right: 4.w), // Giảm margin
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 18.r,
+                          height: 18.r,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(
+                          Icons.my_location,
+                          color: Colors.white,
+                          size: 20.r, // Giảm kích thước icon
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

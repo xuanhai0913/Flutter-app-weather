@@ -25,9 +25,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location to show weather for your current location.</string>
+	<string>Ứng dụng cần quyền truy cập vị trí để hiển thị thời tiết tại địa điểm của bạn.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí để cập nhật thời tiết tại địa điểm của bạn.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app needs access to location to show weather for your current location.</string>
+	<string>Ứng dụng cần quyền truy cập vị trí để hiển thị thời tiết tại địa điểm của bạn.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

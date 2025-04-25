@@ -55,10 +55,8 @@ class LocationService {
       String? countryCode = placemarks.isNotEmpty ? placemarks[0].isoCountryCode : null;
       
       // Add some predefined cities based on the country
-      if (countryCode != null) {
-        cities.addAll(_getCitiesByCountry(countryCode));
-      }
-      
+      cities.addAll(_getCitiesByCountry(countryCode));
+          
       // If we still don't have enough cities, add some global major cities
       if (cities.length < 3) {
         cities.addAll(['London', 'New York', 'Tokyo', 'Paris', 'Sydney']);
@@ -72,8 +70,9 @@ class LocationService {
   }
 
   // Helper method to get major cities by country code
-  List<String> _getCitiesByCountry(String countryCode) {
-    switch (countryCode) {
+  List<String> _getCitiesByCountry(String? countryCode) {
+    // Nếu countryCode là null, sử dụng giá trị mặc định
+    switch (countryCode ?? 'default') {
       case 'US':
         return ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'];
       case 'GB':

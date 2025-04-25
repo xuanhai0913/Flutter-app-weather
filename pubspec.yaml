@@ -55,7 +55,7 @@ dependencies:
   
   # For location services
   geolocator: ^10.0.0
-  geocoding: ^2.3.0
+  geocoding: ^2.1.0  # Sử dụng phiên bản ổn định hơn
 
 dev_dependencies:
   flutter_test:
